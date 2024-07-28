@@ -1,11 +1,11 @@
 locals {
-  create_vnet = var.create_vnet
-  create_subnets = local.create_vnet && var.create_subnets
-  create_nsg = local.create_vnet && var.create_nsg
-  create_nat_gateway = local.create_vnet && var.create_nat_gateway
-  create_firewall = local.create_vnet && var.create_firewall
+  create_vnet            = var.create_vnet
+  create_subnets         = local.create_vnet && var.create_subnets
+  create_nsg             = local.create_vnet && var.create_nsg
+  create_nat_gateway     = local.create_vnet && var.create_nat_gateway
+  create_firewall        = local.create_vnet && var.create_firewall
   create_network_watcher = var.create_network_watcher
-  location             = var.location
+  location               = var.location
 }
 
 data "azurerm_resource_group" "rgrp" {
@@ -40,11 +40,11 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_subnet" "subnet" {
-  count               = local.create_subnets ? length(var.subnets) : 0
-  name                = var.subnets[count.index].name
-  resource_group_name = local.create_vnet ? azurerm_virtual_network.vnet[0].resource_group_name : data.azurerm_resource_group.rgrp[0].name
+  count                = local.create_subnets ? length(var.subnets) : 0
+  name                 = var.subnets[count.index].name
+  resource_group_name  = local.create_vnet ? azurerm_virtual_network.vnet[0].resource_group_name : data.azurerm_resource_group.rgrp[0].name
   virtual_network_name = azurerm_virtual_network.vnet[0].name
-  address_prefixes    = var.subnets[count.index].address_prefixes
+  address_prefixes     = var.subnets[count.index].address_prefixes
 }
 
 resource "azurerm_network_security_group" "nsg" {
@@ -92,10 +92,10 @@ resource "azurerm_public_ip" "nat_public_ip" {
 }
 
 resource "azurerm_subnet_nat_gateway_association" "nat_gateway_association" {
-  for_each             = { for idx, subnet in var.subnets : idx => subnet }
+  for_each = { for idx, subnet in var.subnets : idx => subnet }
 
-  subnet_id            = azurerm_subnet.subnet[each.key].id
-  nat_gateway_id       = azurerm_nat_gateway.nat_gateway[0].id
+  subnet_id      = azurerm_subnet.subnet[each.key].id
+  nat_gateway_id = azurerm_nat_gateway.nat_gateway[0].id
 }
 
 resource "azurerm_firewall" "firewall" {
@@ -103,8 +103,8 @@ resource "azurerm_firewall" "firewall" {
   name                = "example-firewall"
   location            = var.location
   resource_group_name = var.create_resource_group ? azurerm_resource_group.rg[0].name : data.azurerm_resource_group.rgrp[0].name
-  sku_name            = "AZFW_Hub"  # This could be "AZFW_VNet" if you are using a VNet SKU.
-  sku_tier            = "Standard"  # Set to "Standard" or "Premium" depending on your needs
+  sku_name            = "AZFW_Hub" # This could be "AZFW_VNet" if you are using a VNet SKU.
+  sku_tier            = "Standard" # Set to "Standard" or "Premium" depending on your needs
   tags                = var.tags
 
   ip_configuration {
@@ -138,7 +138,7 @@ resource "azurerm_resource_group" "nwatcher" {
 }
 
 resource "azurerm_network_watcher" "nwatcher" {
-  count    = local.create_network_watcher ? 1 : 0
+  count               = local.create_network_watcher ? 1 : 0
   name                = "NetworkWatcher_${local.location}"
   location            = local.location
   resource_group_name = azurerm_resource_group.nwatcher[0].name

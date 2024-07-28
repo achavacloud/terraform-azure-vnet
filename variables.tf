@@ -45,7 +45,7 @@ variable "create_subnets" {
 variable "subnets" {
   description = "List of subnets to create"
   type = list(object({
-    name            = string
+    name             = string
     address_prefixes = list(string)
   }))
   default = []
